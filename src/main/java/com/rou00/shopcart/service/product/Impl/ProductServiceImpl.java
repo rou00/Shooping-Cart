@@ -10,6 +10,7 @@ import com.rou00.shopcart.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,33 +52,42 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductDTO> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return mapListFromProductToProductDto(products);
+    }
+
+
+
+    @Override
+    public List<ProductDTO> getProductsByCategory(String category) {
+        List<Product> products = productRepository.findByCategoryName(category);
+        return mapListFromProductToProductDto(products);
+
     }
 
     @Override
-    public List<Product> getProductsByCategory(String category) {
-        return productRepository.findByCategoryName(category);
+    public List<ProductDTO> getProductsByBrand(String brand) {
+        List<Product> products = productRepository.findByBrand(brand);
+        return mapListFromProductToProductDto(products);
     }
 
     @Override
-    public List<Product> getProductsByBrand(String brand) {
-        return productRepository.findByBrand(brand);
+    public List<ProductDTO> getProductsByCategoryAndBrand(String category, String brand) {
+        List<Product> products =productRepository.findByCategoryNameAndBrand(category,brand);
+        return mapListFromProductToProductDto(products);
     }
 
     @Override
-    public List<Product> getProductsByCategoryAndBrand(String category, String brand) {
-        return productRepository.findByCategoryNameAndBrand(category,brand);
+    public List<ProductDTO> getProductsByName(String name) {
+        List<Product> products = productRepository.findByName(name);
+        return mapListFromProductToProductDto(products);
     }
 
     @Override
-    public List<Product> getProductsByName(String name) {
-        return productRepository.findByName(name);
-    }
-
-    @Override
-    public List<Product> getProductsByBrandAndName(String brand, String name) {
-        return productRepository.findByBrandAndName(brand,name);
+    public List<ProductDTO> getProductsByBrandAndName(String brand, String name) {
+        List<Product> products =  productRepository.findByBrandAndName(brand,name);
+        return mapListFromProductToProductDto(products);
     }
 
     @Override
@@ -86,7 +96,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Mapping , it is prefered to do it in a seperate package
-    private Product mapToProduct(ProductDTO productDto, Category category){
+    public Product mapToProduct(ProductDTO productDto, Category category){
         return new Product(
                 productDto.getName(),
                 productDto.getBrand(),
@@ -96,7 +106,17 @@ public class ProductServiceImpl implements ProductService {
                 category
         );
     }
-    private ProductDTO mapToProductDTO(Product product){
+    public Product mapToProd(ProductDTO productDto){
+        return new Product(
+                productDto.getName(),
+                productDto.getBrand(),
+                productDto.getPrice(),
+                productDto.getInventory(),
+                productDto.getDescription(),
+                productDto.getCategory()
+        );
+    }
+    public ProductDTO mapToProductDTO(Product product){
         return new ProductDTO(
                 product.getName(),
                 product.getBrand(),
@@ -105,5 +125,12 @@ public class ProductServiceImpl implements ProductService {
                 product.getDescription(),
                 product.getCategory()
         );
+    }
+    private List<ProductDTO> mapListFromProductToProductDto(List<Product> products){
+        List<ProductDTO> productDTOS = new ArrayList<>();
+        for(Product p : products){
+            productDTOS.add(mapToProductDTO(p));
+        }
+        return productDTOS;
     }
 }

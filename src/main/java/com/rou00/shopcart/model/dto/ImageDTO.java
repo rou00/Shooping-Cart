@@ -13,9 +13,6 @@ public class ImageDTO {
     private String fileName;
     private String fileType;
 
-    private Blob image;
     private String downloadUrl;
-
-    private Product product;
 
 }

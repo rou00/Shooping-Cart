@@ -62,12 +62,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     // Mapping , it is prefered to do it in a seperate package
-    private Category mapToCategory(CategoryDTO categoryDto){
+    public Category mapToCategory(CategoryDTO categoryDto){
         return new Category(
                 categoryDto.getName()
         );
     }
-    private CategoryDTO mapTOCategoryDTO(Category category){
+    public CategoryDTO mapTOCategoryDTO(Category category){
         return new CategoryDTO(
                 category.getName()
         );
