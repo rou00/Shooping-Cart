@@ -8,7 +8,7 @@ import java.util.List;
 public interface ProductService {
 
     ProductDTO addProduct (ProductDTO productDto);
-    ProductDTO getProductById(Long id);
+    Product getProductById(Long id);
     void deleteProductById(Long id);
     ProductDTO updateProductById(ProductDTO productDto, Long id);
 
@@ -22,7 +22,7 @@ public interface ProductService {
     Long countProductByBrandAndName(String brand, String name);
 
 
+    List<ProductDTO> getConvertedProducts(List<Product> products);
 
-
-
+    ProductDTO converttoDto(Product product);
 }

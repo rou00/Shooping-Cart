@@ -1,13 +1,17 @@
 package com.rou00.shopcart.service.product.Impl;
 
 import com.rou00.shopcart.exceptions.ResourceNotFound;
+import com.rou00.shopcart.model.dto.ImageDTO;
 import com.rou00.shopcart.model.dto.ProductDTO;
 import com.rou00.shopcart.model.entity.Category;
+import com.rou00.shopcart.model.entity.Image;
 import com.rou00.shopcart.model.entity.Product;
+import com.rou00.shopcart.repository.ImageRepository;
 import com.rou00.shopcart.repository.ProductRepository;
 import com.rou00.shopcart.service.product.ProductService;
 import com.rou00.shopcart.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,6 +25,8 @@ public class ProductServiceImpl implements ProductService {
     // using the annotaion RequiredArgsConstructor and declaring the repository final , lombol will automaticaly generate the constructor and spring boot will inject it
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private ModelMapper modelMapper;
+    private final ImageRepository imageRepository;
 
     @Override
     public ProductDTO addProduct(ProductDTO productDto) {
@@ -34,8 +40,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO getProductById(Long id) {
-        return mapToProductDTO(productRepository.findById(id).orElseThrow(() -> new ResourceNotFound("Product Not Found !")));
+    public Product getProductById(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new ResourceNotFound("Product Not Found !"));
     }
 
     @Override
@@ -132,5 +138,19 @@ public class ProductServiceImpl implements ProductService {
             productDTOS.add(mapToProductDTO(p));
         }
         return productDTOS;
+    }
+
+    @Override
+    public List<ProductDTO> getConvertedProducts(List<Product> products){
+        return products.stream().map(this::converttoDto).toList();
+    }
+
+    @Override
+    public ProductDTO converttoDto(Product product){
+        ProductDTO productDTO = modelMapper.map(product,ProductDTO.class);
+        List<Image> images = imageRepository.findByProductId(product.getId());
+        List<ImageDTO> imageDTOS = images.stream().map(image -> modelMapper.map(image, ImageDTO.class)).toList();
+        productDTO.setImages(imageDTOS);
+        return productDTO;
     }
 }

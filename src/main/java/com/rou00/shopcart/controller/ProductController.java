@@ -1,9 +1,11 @@
 package com.rou00.shopcart.controller;
 
 import com.rou00.shopcart.model.dto.ProductDTO;
+import com.rou00.shopcart.model.entity.Product;
 import com.rou00.shopcart.repository.ProductRepository;
 import com.rou00.shopcart.service.product.Impl.ProductServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +29,8 @@ public class ProductController {
     @GetMapping("/product/getById/{productId}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long productId){
         try {
-            ProductDTO productDTO = productService.getProductById(productId);
-            return new ResponseEntity<>(productDTO,HttpStatus.FOUND);
+            Product product = productService.getProductById(productId);
+            return new ResponseEntity<>(productService.mapToProductDTO(product),HttpStatus.FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
         }
@@ -66,8 +68,8 @@ public class ProductController {
 
         }
     }
-    @GetMapping("/getByBrand&Name/{brandName}/{productName}")
-    public ResponseEntity<List<ProductDTO>> getProductByBrandName(@PathVariable String brandName,@PathVariable String productName){
+    @GetMapping("/getByBrand&Name")
+    public ResponseEntity<List<ProductDTO>> getProductByBrandAndName(@RequestParam String brandName,@RequestParam String productName){
         try {
             List<ProductDTO> productDTOS = productService.getProductsByBrandAndName(brandName,productName);
             if(!productDTOS.isEmpty()){
@@ -102,5 +104,45 @@ public class ProductController {
             return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/getByBrandName/{brandName}")
+    public ResponseEntity<List<ProductDTO>> getProductByBrandName(@PathVariable String brandName){
+        try {
+            List<ProductDTO> productDTOS = productService.getProductsByBrand(brandName);
+            if(!productDTOS.isEmpty()){
+                return new ResponseEntity<>(productDTOS,HttpStatus.FOUND);
+            }
+            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @GetMapping("/category/{categoryName}")
+    public ResponseEntity<List<ProductDTO>> getProductByCategoryName(@PathVariable String categoryName){
+        try {
+            List<ProductDTO> productDTOS = productService.getProductsByCategory(categoryName);
+            if(!productDTOS.isEmpty()){
+                return new ResponseEntity<>(productDTOS,HttpStatus.FOUND);
+            }
+            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/count/ByBrand&Name")
+    public ResponseEntity<Long> countProductByBrandAndName(@RequestParam String brand, @RequestParam String name){
+        try {
+            var  productCount = productService.countProductByBrandAndName(brand,name);
+            if(productCount == 0){
+                return new ResponseEntity<>(productCount,HttpStatus.FOUND);
+            }
+            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
 }
