@@ -2,12 +2,14 @@ package com.rou00.shopcart.model.dto;
 
 import com.rou00.shopcart.model.entity.Category;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class ProductDTO {
     private Long id;
     private String name;

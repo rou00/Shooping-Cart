@@ -32,19 +32,24 @@ public class CartItemServiceImpl implements CartItemService {
                                 .filter(item -> item.getProduct().getId().equals(productId))
                                 .findFirst().orElse(new CartItem());
 
-        if(cartItem.getId() == null){
-            cartItem.setCart(cart);
-            cartItem.setProduct(product);
-            cartItem.setQuantity(quantity);
-            cartItem.setUnitPrice(product.getPrice());
+        if(product.getInventory() >= quantity) {
+            if (cartItem.getId() == null) {
+                // check if the product exist
+                cartItem.setCart(cart);
+                cartItem.setProduct(product);
+                cartItem.setQuantity(quantity);
+                cartItem.setUnitPrice(product.getPrice());
+            } else {
+                cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            }
+            cartItem.setTotalPtice();
+            cart.addItem(cartItem);
+            cartItemRepository.save(cartItem);
+            cartRepository.save(cart);
         }else{
-            cartItem.setQuantity(cartItem.getQuantity()+quantity);
+            throw new ResourceNotFound("the Quantity Requested is to much to ask for");
         }
 
-        cartItem.setTotalPtice();
-        cart.addItem(cartItem);
-        cartItemRepository.save(cartItem);
-        cartRepository.save(cart);
     }
 
     @Override

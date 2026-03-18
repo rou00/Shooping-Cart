@@ -1,8 +1,11 @@
 package com.rou00.shopcart.controller;
 
+import com.rou00.shopcart.model.entity.Cart;
 import com.rou00.shopcart.model.entity.CartItem;
+import com.rou00.shopcart.model.entity.User;
 import com.rou00.shopcart.service.Cart.CartItemService;
 import com.rou00.shopcart.service.Cart.Impl.CartServiceImpl;
+import com.rou00.shopcart.service.User.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
@@ -15,16 +18,18 @@ import org.springframework.web.bind.annotation.*;
 public class CartItemController {
     private final CartItemService cartItemService;
     private final CartServiceImpl cartService;
+    private final UserService userService;
 
     @PostMapping("/item/add")
-    public ResponseEntity<CartItem> addItemToCart(@RequestParam (required = false) Long cartId, @RequestParam Long productId, @RequestParam Integer quantity){
+    public ResponseEntity<CartItem> addItemToCart(@RequestParam Long productId, @RequestParam Integer quantity,@RequestParam Long userId){
         try {
-            if(cartId == null){
-                  cartId = cartService.initilizeNewCart();
-            }
-            cartItemService.addItemToCart(cartId,productId,quantity);
+                  User user = userService.getUserById(userId);
+                  Cart cart = cartService.initilizeNewCart(user);
+
+            cartItemService.addItemToCart(cart.getId(),productId,quantity);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
