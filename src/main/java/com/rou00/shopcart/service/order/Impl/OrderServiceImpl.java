@@ -2,20 +2,24 @@ package com.rou00.shopcart.service.order.Impl;
 
 import com.rou00.shopcart.enums.OrderStatus;
 import com.rou00.shopcart.exceptions.ResourceNotFound;
+import com.rou00.shopcart.model.dto.OrderDTO;
 import com.rou00.shopcart.model.entity.Cart;
 import com.rou00.shopcart.model.entity.Order;
 import com.rou00.shopcart.model.entity.OrderItem;
 import com.rou00.shopcart.model.entity.Product;
+import com.rou00.shopcart.repository.CartRepository;
 import com.rou00.shopcart.repository.OrderRepository;
 import com.rou00.shopcart.repository.ProductRepository;
 import com.rou00.shopcart.service.Cart.Impl.CartServiceImpl;
 import com.rou00.shopcart.service.order.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -26,6 +30,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final CartServiceImpl cartService;
+    private final ModelMapper modelMapper;
+    private final CartRepository cartRepository;
 
     @Transactional
     @Override
@@ -34,9 +40,11 @@ public class OrderServiceImpl implements OrderService {
         Order order = createOrder(cart);
         List<OrderItem> orderItems = createOrderItems(order,cart);
         order.setOrderItems(new HashSet<>(orderItems));
+        order.setOrderStatus(OrderStatus.PROCESSING);
         order.setTotalAmount(calaculateTotalAmount(orderItems));
         Order savedOrder = orderRepository.save(order);
         cartService.clearCart(cart.getId());
+        cartRepository.deleteById(cart.getId());
         return savedOrder;
     }
 
@@ -69,13 +77,32 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Order getOrder(Long orderId) {
+    public OrderDTO getOrder(Long orderId) {
         return orderRepository.findById(orderId)
+                .map(this ::convertToDTO)
                 .orElseThrow(() -> new ResourceNotFound("Order not Found"));
     }
 
     @Override
-    public List<Order> getUserOrders(Long userId){
-        return orderRepository.findByUserId(userId);
+    public List<OrderDTO> getAllOrderMadeByUsers() {
+        List<Order> orders = orderRepository.findAll();
+        List<OrderDTO> ordersDto = new ArrayList<>();
+        for(Order r :orders){
+            ordersDto.add(convertToDTO(r));
+        }
+        return ordersDto;
+    }
+
+
+    @Override
+    public List<OrderDTO> getUserOrders(Long userId){
+        return orderRepository.findByUserId(userId)
+                .stream().map(this :: convertToDTO)
+                .toList();
+    }
+
+    @Override
+    public OrderDTO convertToDTO(Order order){
+        return  modelMapper.map(order,OrderDTO.class);
     }
 }

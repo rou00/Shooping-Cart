@@ -2,6 +2,7 @@ package com.rou00.shopcart.service.Cart.Impl;
 
 import com.rou00.shopcart.exceptions.ResourceNotFound;
 import com.rou00.shopcart.model.entity.Cart;
+import com.rou00.shopcart.model.entity.User;
 import com.rou00.shopcart.repository.CartItemRepository;
 import com.rou00.shopcart.repository.CartRepository;
 import com.rou00.shopcart.service.Cart.CartService;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
@@ -33,6 +35,8 @@ public class CartServiceImpl implements CartService {
         cartItemRepository.deleteAllByCartId(id);
         cart.getCartItems().clear();
         cartRepository.deleteById(id);
+        // to delte cart after ordering
+        cartRepository.delete(cart);
     }
 
     @Override
@@ -42,11 +46,13 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Long initilizeNewCart(){
-        Cart newCart = new Cart();
-         //Long newCartId = cartIdGenerator.incrementAndGet();
-        //newCart.setId(newCartId);
-        return  cartRepository.save(newCart).getId();
+    public Cart initilizeNewCart(User user){
+        return Optional.ofNullable(getCartByUserId(user.getId()))
+                .orElseGet(()-> {
+                    Cart cart = new Cart();
+                    cart.setUser(user);
+                    return cartRepository.save(cart);
+                });
     }
 
     @Override
