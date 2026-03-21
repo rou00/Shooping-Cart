@@ -21,9 +21,9 @@ public class CartItemController {
     private final UserService userService;
 
     @PostMapping("/item/add")
-    public ResponseEntity<CartItem> addItemToCart(@RequestParam Long productId, @RequestParam Integer quantity,@RequestParam Long userId){
+    public ResponseEntity<CartItem> addItemToCart(@RequestParam Long productId, @RequestParam Integer quantity){
         try {
-                  User user = userService.getUserById(userId);
+                  User user = userService.getAuthenticatedUser();
                   Cart cart = cartService.initilizeNewCart(user);
 
             cartItemService.addItemToCart(cart.getId(),productId,quantity);
