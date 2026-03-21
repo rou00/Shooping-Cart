@@ -3,7 +3,9 @@ package com.rou00.shopcart.service.User.Impl;
 import com.rou00.shopcart.exceptions.ResourceExists;
 import com.rou00.shopcart.exceptions.ResourceNotFound;
 import com.rou00.shopcart.model.dto.UserDTO;
+import com.rou00.shopcart.model.entity.Role;
 import com.rou00.shopcart.model.entity.User;
+import com.rou00.shopcart.repository.RoleRepository;
 import com.rou00.shopcart.repository.UserRepository;
 import com.rou00.shopcart.request.CreateUserRequest;
 import com.rou00.shopcart.request.UpdateUseRequest;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Override
     public User getUserById(Long id) {
@@ -33,6 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(CreateUserRequest request) {
+
         return Optional.of(request)
                 .filter(user -> !userRepository.existsByEmail(request.getEmail()))
                 .map(req -> {
@@ -41,6 +46,8 @@ public class UserServiceImpl implements UserService {
                     user.setPassword(passwordEncoder.encode(req.getPassword()));
                     user.setFirstName(req.getFirstName());
                     user.setLastName(req.getLastName());
+                    Role role = roleRepository.findByName(req.getRole());
+                    user.setRoles(Set.of(role));
                     return userRepository.save(user);
                 }).orElseThrow(()-> new ResourceExists(request.getEmail() + " Already Exists!"));
     }
