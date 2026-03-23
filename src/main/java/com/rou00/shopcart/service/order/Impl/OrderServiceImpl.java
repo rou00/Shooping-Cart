@@ -43,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(OrderStatus.PROCESSING);
         order.setTotalAmount(calaculateTotalAmount(orderItems));
         Order savedOrder = orderRepository.save(order);
+        cart.setTotalAmount(BigDecimal.valueOf(0));
         cartService.clearCart(cart.getId());
         cartRepository.deleteById(cart.getId());
         return savedOrder;

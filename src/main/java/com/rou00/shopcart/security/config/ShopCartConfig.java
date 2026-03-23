@@ -2,6 +2,7 @@ package com.rou00.shopcart.security.config;
 
 import com.rou00.shopcart.security.jwt.AuthTokenFilter;
 import com.rou00.shopcart.security.jwt.JwtAuthEntryPoint;
+import com.rou00.shopcart.security.jwt.JwtUtils;
 import com.rou00.shopcart.security.user.ShopUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,10 +26,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class ShopCartConfig {
 
     private final ShopUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint authEntryPoint;
+    private final JwtUtils jwtUtils;
 
     private static final List<String> SECURED_URLS =
             List.of("/api/v1/carts/**","/api/v1/cartItems/**");
@@ -46,7 +50,7 @@ public class ShopCartConfig {
 
     @Bean
     public AuthTokenFilter authTokenFilter(){
-        return new AuthTokenFilter();
+        return new AuthTokenFilter(jwtUtils,userDetailsService);
     }
 
     @Bean
