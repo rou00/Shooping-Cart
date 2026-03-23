@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Var;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,17 +37,20 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/product/add")
     public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO){
         try {
             ProductDTO theProduct = productService.addProduct(productDTO);
             return new ResponseEntity<>(theProduct,HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/product/update/{productId}")
     public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO,@PathVariable Long productId){
         try {
@@ -58,6 +62,8 @@ public class ProductController {
         }
     }
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/product/delete/{productId}")
     public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long productId){
         try {
